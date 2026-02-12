@@ -15,7 +15,7 @@ def install_dependencies():
 
     if missing:
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing])
-    return
+
 
 def main():
     install_dependencies()
@@ -62,11 +62,14 @@ def main():
     # Automated opening of the output text file. Runs a powershell command to just open webdata after writing to it.
     # This only works on windows machines!!! Will need to edit for linux/Mac
     subprocess.run(["powershell", 'Invoke-Item -path "webdata.txt"'], shell=True)
+    return
+
+main()
+
 
 # Bunch of early tests to see if any of this actually worked. Found a way to enter username/password info and click
 # the login button, but it gives a "ssoverifier missing" error and doesn't load the actual user dashboard or profile.
 # TODO: Emmanuel and Irving, can you find a way to fix this?
-
 """
 url = f"https://ahasso.heart.org/login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fscope%3Dopenid%2520profile%2520email%26response_type%3Dcode%26code_challenge_method%3DS256%26redirect_uri%3Dhttps%253A%252F%252Fatlas.heart.org%252Flocation%26state%3D2afa29aa-0747-46e9-afed-a17e6056e106%26client_id%3DAHA-ATLAS-PROD%26code_challenge%3DF04-q4p2L15wYutR8OKGPdXmOTlYP6Ik_rBtJ8VnepU"
 
