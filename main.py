@@ -59,6 +59,8 @@ def main():
 
     f.close()
 
+    # Automated opening of the output text file. Runs a powershell command to just open webdata after writing to it.
+    # This only works on windows machines!!! Will need to edit for linux/Mac
     subprocess.run(["powershell", 'Invoke-Item -path "webdata.txt"'], shell=True)
 
 # Bunch of early tests to see if any of this actually worked. Found a way to enter username/password info and click
