@@ -18,7 +18,7 @@ def install_dependencies():
 
 
 def main():
-    install_dependencies()
+    install_dependencies() # You can comment this out if you know you already have the required libraries installed
     # Below is a working demo for an automated browser opening the AHA website and reading page text just like a user.
     # Selenium digs through the javascript for the actual html/css, then Beautifulsoup's parser makes it readable.
     # Both are free to use. Will find ways to package these in with the final product plus their licenses
