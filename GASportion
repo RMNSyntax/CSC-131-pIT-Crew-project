@@ -1,0 +1,17 @@
+#### This is going to be over the course of multiple files. The only issue I ran into is adding multiple files to the GitHub branch. 
+
+*Apps Scrips supports multiple .gs files while what I include will mirror that structure.
+ 
+*In the meantime, I will use the following format to put multiple .gs files into one Google Apps Script file.
+
+*For each .gs file will have a title followed w/ code such that:
+	“main.gs”
+	Followed by some code
+
+*PS. I know not everything in the code follows the same format (more specifically the comments), I will work/update on making everything in the code consistent. I tried to refactor as much as I can, but there’s always room for improvement. 
+
+PSS Regarding the part two of this project, we can implement a Google Calendar API to implement scheduling into this code too. 
+
+
+ ###
+
