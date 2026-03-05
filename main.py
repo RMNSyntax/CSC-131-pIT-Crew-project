@@ -1,34 +1,50 @@
 # By Rhianna Nichols Thomae, 2/11/2026
 # CSC 131 Software Engineering Project - Automated Webpage Parser test
 import subprocess
-import sys
-import pkg_resources
 from bs4 import BeautifulSoup
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-def install_dependencies():
-    required = {'bs4', 'selenium'}
-    installed = {pkg.key for pkg in pkg_resources.working_set}
-    missing = required - installed
 
-    if missing:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing])
+# def install_dependencies():
+#    required = {'bs4', 'selenium'}
+#    installed = {pkg.key for pkg in pkg_resources.working_set}
+#    missing = required - installed
+#
+#    if missing:
+#        subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing])
 
-
-def main():
-    install_dependencies() # You can comment this out if you know you already have the required libraries installed
+# install_dependencies() # You can comment this out if you know you already have the required libraries installed
     # Below is a working demo for an automated browser opening the AHA website and reading page text just like a user.
     # Selenium digs through the javascript for the actual html/css, then Beautifulsoup's parser makes it readable.
     # Both are free to use. Will find ways to package these in with the final product plus their licenses
 
-    options = webdriver.FirefoxOptions()
-    # "--headless" mode operates the browser without opening a visible browser window. Commented out so we can test
+options = webdriver.FirefoxOptions()
+# "--headless" mode operates the browser without opening a visible browser window. Commented out so we can test
     # This way the client doesn't see windows popping up any time a new student is added to the roster
-    # options.add_argument("--headless")
+#options.add_argument("--headless")
+driver = webdriver.Firefox(options=options)
 
-    driver = webdriver.Firefox(options=options)
+
+
+
+
+def new_student(webdriver):
+    #nonfunctioning code atm, uses pseudocode/placeholder element strings
+
+    student = driver.find_element(By.ID, "[Student Name]")
+    phone = driver.find_element(By.ID, "[Phone Number]")
+    email = driver.find_element(By.ID, "[Email]")
+
+    # redundancyCheck(student)
+    f = open("webdata.txt", 'w')
+    lines = [BeautifulSoup(student.get_attribute("innerHTML"), 'html.parser'), BeautifulSoup(phone.get_attribute("innerHTML"), 'html.parser'), BeautifulSoup(email.get_attribute("innerHTML"), 'html.parser')]
+
+
+
+def main():
+
 
     driver.get("https://atlas.heart.org/")
     time.sleep(2)
@@ -58,6 +74,8 @@ def main():
         f.write('\n')
 
     f.close()
+
+
 
     # Automated opening of the output text file. Runs a powershell command to just open webdata after writing to it.
     # This only works on windows machines!!! Will need to edit for linux/Mac
