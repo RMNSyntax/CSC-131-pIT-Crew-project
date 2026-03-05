@@ -12,8 +12,4 @@ client = gspread.authorize(credentials)
 
 sheet = client.open('python data input test').sheet1
 
-sheet.update([['butternut squash']], 'A2')
-
-first_row = sheet.row_values(1)
-print(f"First row of data: {first_row}")
-
+sheet.update([['Hello world!! this is the second row of the first column!']], 'A2')
