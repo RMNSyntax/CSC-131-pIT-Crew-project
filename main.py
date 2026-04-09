@@ -1,74 +1,117 @@
 # By Rhianna Nichols Thomae, 2/11/2026
 # CSC 131 Software Engineering Project - Automated Webpage Parser test
 import subprocess
+
 from bs4 import BeautifulSoup
+import urlconvert
 import time
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
+import os.path
+# from selenium.webdriver.common.virtual_authenticator import VirtualAuthenticatorOptions
+# from playwright.sync_api import sync_playwright
 
 
-# def install_dependencies():
-#    required = {'bs4', 'selenium'}
-#    installed = {pkg.key for pkg in pkg_resources.working_set}
-#    missing = required - installed
-#
-#    if missing:
-#        subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing])
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-# install_dependencies() # You can comment this out if you know you already have the required libraries installed
-    # Below is a working demo for an automated browser opening the AHA website and reading page text just like a user.
-    # Selenium digs through the javascript for the actual html/css, then Beautifulsoup's parser makes it readable.
-    # Both are free to use. Will find ways to package these in with the final product plus their licenses
-
-options = webdriver.FirefoxOptions()
-# "--headless" mode operates the browser without opening a visible browser window. Commented out so we can test
-    # This way the client doesn't see windows popping up any time a new student is added to the roster
-#options.add_argument("--headless")
+options = Options()
+options.add_argument("-profile")
+options.add_argument("C:/Users/Ryan/AppData/Roaming/Mozilla/Firefox/Profiles/38LpQTRD.Profile 1")
+# options.add_argument("--headless")
 driver = webdriver.Firefox(options=options)
 
 
+def new_student(tablecells,class_date):
+    # nonfunctioning code atm, uses pseudocode/placeholder element strings
+    sheetline = []
+    course_name = ""
+    fulltitle = driver.find_element(By.CLASS_NAME,"viewClass_classTitle__kzdvA")
+    if "BLS" in fulltitle.text:
+        course_name = "BLS"
+    elif "ACLS" in fulltitle.text:
+        course_name = "ACLS"
 
 
 
-def new_student(webdriver):
-    #nonfunctioning code atm, uses pseudocode/placeholder element strings
 
-    student = driver.find_element(By.ID, "[Student Name]")
-    phone = driver.find_element(By.ID, "[Phone Number]")
-    email = driver.find_element(By.ID, "[Email]")
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+             'https://www.googleapis.com/auth/drive'
+             ]
 
-    # redundancyCheck(student)
-    f = open("webdata.txt", 'w')
-    lines = [BeautifulSoup(student.get_attribute("innerHTML"), 'html.parser'), BeautifulSoup(phone.get_attribute("innerHTML"), 'html.parser'), BeautifulSoup(email.get_attribute("innerHTML"), 'html.parser')]
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+    client = gspread.authorize(credentials)
+
+    sheet = client.open('AHA Registration TEST COPY').sheet1
+    phone = ""
+    row = 2
+    for i in range(0, len(tablecells)-1, 5):
+
+        email = tablecells[i].text
+        nameplusnumber = tablecells[i+1].text
+
+        registered = tablecells[i+2].text
+        enrolled_by = tablecells[i+3].text
+        a = nameplusnumber.find(" ")
+        fname = nameplusnumber[0:a]
+        b = nameplusnumber.find("\n")
+        if b != -1:
+            lname = nameplusnumber[a+1:b]
+            phone = nameplusnumber[b+4:]
+        else:
+            lname = nameplusnumber[a+1:]
+
+        studentinfo = [email, fname, "", lname, phone, course_name, class_date, "", "YES"]
+        sheet.insert_row(studentinfo, row)
+        row += 1
 
 
 
 def main():
-
-
-    driver.get("https://atlas.heart.org/")
+    #driver.get("https://atlas.heart.org/dashboard")
+    datestr = ""
+    with open("email.txt", 'r') as f:
+        for line in f:
+            if "You have one or more incoming class enrollment requests" in line:
+                datestr = line[-12:-2]
+                break
+    date = urlconvert.dateparser(datestr)
+    mm = date[0]
+    dd = date[1]
+    yy = date[2]
+    newurl = urlconvert.urlmaker(mm, dd, yy)
+    driver.get(newurl)
     time.sleep(2)
 
-    # Because Selenium looks for webpage elements by specific identifiable traits, sometimes there's multiple results,
-    # For now I hardcode in the exact item i want to display the subtitle underneath the big banner
-    # It's a hack but it works + it proves we can find any data in a webpage that we need and extract it
-    # TODO: To extract student info from the AHA site, we need to automate logging in securely without errors.
+    # okay it actually works without any tricks or secrets now
 
-    banner = driver.find_element(By.TAG_NAME, "h1")
-    bannertext = BeautifulSoup(banner.get_attribute("innerHTML"), 'html.parser')
-    print(bannertext.get_text())                                        # Print to console just to verify it's working
+    tabledata = driver.find_elements(By.TAG_NAME, "td")
+    idx = 3
 
-    popups = driver.find_elements(By.TAG_NAME, "p")
-    popup = popups.__getitem__(1)
-    popuptext = BeautifulSoup(popup.get_attribute("innerHTML"), 'html.parser')
-    print(popuptext.get_text())                                         # Ditto
 
-    # Then the extracted webpage data is stored as plain text in a .txt file.
-    # If it can be stored in a .txt it can be spat back out into a spreadsheet without too much effort, right?
-    # TODO: test that assumption???
+    for i in range(3, len(tabledata)-1, 6):
+        d = tabledata[i]
+        if f'0{mm}-{dd}-{yy}' in d.text:
+            newbutton = tabledata[i+2].find_element(By.TAG_NAME, "a")
+            newbutton.click()
+            time.sleep(0.3)
+            dropdown = tabledata[i+2].find_element(By.TAG_NAME, "ul")
+            view = dropdown.find_element(By.CSS_SELECTOR, "[aria-label='View']")
+            view.click()
+            break
+    time.sleep(2)
+    tabledata = ""
+
+    tabledata = driver.find_elements(By.TAG_NAME, "td")
+    new_student(tablecells=tabledata,class_date=datestr)
+
+    driver.close()
+
+
 
     f = open("webdata.txt", 'w')
-    lines = [bannertext.get_text(),popuptext.get_text()]
+    lines = []
     for line in lines:
         f.write(line)
         f.write('\n')
@@ -76,51 +119,33 @@ def main():
     f.close()
 
 
-
     # Automated opening of the output text file. Runs a powershell command to just open webdata after writing to it.
     # This only works on windows machines!!! Will need to edit for linux/Mac
-    subprocess.run(["powershell", 'Invoke-Item -path "webdata.txt"'], shell=True)
+    # subprocess.run(["powershell", 'Invoke-Item -path "webdata.txt"'], shell=True)
     return
+
 
 main()
 
 
-# Bunch of early tests to see if any of this actually worked. Found a way to enter username/password info and click
-# the login button, but it gives a "ssoverifier missing" error and doesn't load the actual user dashboard or profile.
-# TODO: Emmanuel and Irving, can you find a way to fix this?
+# Selenium Login Test
 """
 url = f"https://ahasso.heart.org/login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fscope%3Dopenid%2520profile%2520email%26response_type%3Dcode%26code_challenge_method%3DS256%26redirect_uri%3Dhttps%253A%252F%252Fatlas.heart.org%252Flocation%26state%3D2afa29aa-0747-46e9-afed-a17e6056e106%26client_id%3DAHA-ATLAS-PROD%26code_challenge%3DF04-q4p2L15wYutR8OKGPdXmOTlYP6Ik_rBtJ8VnepU"
-
 driver.get(url)
 time.sleep(2)
-
 email = driver.find_element(By.ID, "Email")
 email.send_keys("Sacstatecpr@outlook.com")
 passw = driver.find_element(By.ID, "Password")
 passw.send_keys("ssCPR123*")
 signin = driver.find_element(By.ID, "btnSignIn")
 signin.click()
-time.sleep(2)
-signin = driver.find_element(By.XPATH, "//input[@button class='btn btn-link Header_disableSignIn__jFG_h']")
+time.sleep(5)
+signin = driver.find_element(By.CLASS_NAME, "")
 signin.click()
-
-
-
-
-soup = BeautifulSoup("<p>Some <b>bad <i>HTML!!!", 'html.parser')
-print(soup.get_text())
-
-
-res = requests.get('https://atlas.heart.org/organisation/view-class?id=20008252&applyTsFilter=false&isClassesTeach=true&isNavigated=true')
-soup = BeautifulSoup(res.content, 'html.parser')
-print(soup.prettify())
-
-content = soup.find('div', class_='article--viewer_content')
-if content:
-    for para in content.find_all('p'):
-        print(para.text.strip())
-else:
-    print("No article content found.")
 """
 
+# Playwright Login Test
+"""
+Just Kidding, I never got to do a playwright login test because it still won't install!!! Yippee!!!!
+"""
 
