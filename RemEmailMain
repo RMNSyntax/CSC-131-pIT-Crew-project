@@ -1,3 +1,4 @@
+// Coded in JavaScript for App Script
 function main() {
   //Access google sheet
   var wb = SpreadsheetApp.getActiveSpreadsheet();
@@ -6,14 +7,14 @@ function main() {
   var sheet = wb.getSheetByName("Sheet1");
 
   var data = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getDisplayValues();
-
+  // Set variables by line here, replace 1st var with latest line for final version.
   var recipient = data[1][0];
   var name = data[1][2];
   var idate = data[1][4];
   var edate = data[1][5];
   // mailing list
   var listPpl = [recipient];
-  // create template object for dynamic constructing html
+  // create template object for dynamic constructing html, see HTML
   var htmlTemplate = HtmlService.createTemplateFromFile('RemEmail');
 
   htmlTemplate.recipient = recipient;
