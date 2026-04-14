@@ -1,1 +1,33 @@
+function main() {
+  //Access google sheet
+  var wb = SpreadsheetApp.getActiveSpreadsheet();
+
+  // access the sheet with the data
+  var sheet = wb.getSheetByName("Sheet1");
+
+  var data = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getDisplayValues();
+
+  var recipient = data[1][0];
+  var name = data[1][2];
+  var idate = data[1][4];
+  var edate = data[1][5];
+  // mailing list
+  var listPpl = [recipient];
+  // create template object for dynamic constructing html
+  var htmlTemplate = HtmlService.createTemplateFromFile('RemEmail');
+
+  htmlTemplate.recipient = recipient;
+  htmlTemplate.name = name;
+  htmlTemplate.idate = idate;
+  htmlTemplate.edate = edate;
+
+  var htmlForEmail = htmlTemplate.evaluate().getContent();
+
+  // Send the email
+  GmailApp.sendEmail(
+    listPpl, name + ', your CPR certification is expiring soon', 'this email contains html',
+    {htmlBody: htmlForEmail}
+  )
+
+}
 
