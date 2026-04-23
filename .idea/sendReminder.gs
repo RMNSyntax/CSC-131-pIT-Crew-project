@@ -1,5 +1,5 @@
 // @Author Ethan McDonald
-// @Version 1.2 4/23/2026
+// @Version 1.3 4/23/2026
 // This currently works on my sheet, the cells for the variables may need to be switched around
 // This method needs to be run everyday @ 5pm (Arbitrary time), it checks each User to see if todays date is the reminder date, then sends reminder email.
 // Requires GlobalVariables.gs
@@ -46,4 +46,11 @@ function sendReminder() {
         }
       }
   })
+}
+
+function formatDate(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}-${day}-${year}`;
 }
