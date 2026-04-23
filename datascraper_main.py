@@ -3,13 +3,11 @@
 
 import datascraper_urlconvert as urlconvert
 # import datascraper_mailbag as mailbag
+import RQI_upload
 import time
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-
-
-
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -19,7 +17,6 @@ options.add_argument("-profile")
 options.add_argument("C:/Users/Ryan/AppData/Roaming/Mozilla/Firefox/Profiles/38LpQTRD.Profile 1")
 options.add_argument("--headless")
 driver = webdriver.Firefox(options=options)
-
 
 
 def AHA_new_student(tablecells, class_date):
@@ -59,27 +56,27 @@ def AHA_new_student(tablecells, class_date):
         c = nameplusnumber.find("\n")
         if c != -1:
             phone = nameplusnumber[c + 4:]
-        b = nameplusnumber[a+1:c].find(" ")
+        b = nameplusnumber[a + 1:c].find(" ")
         mname = ""
         if b != -1:
-            mname = nameplusnumber[a+1:b]
-            lname = nameplusnumber[b+1:c]
+            mname = nameplusnumber[a + 1:b]
+            lname = nameplusnumber[b + 1:c]
         else:
-            lname = nameplusnumber[a+1:c]
+            lname = nameplusnumber[a + 1:c]
 
-
-        studentinfo = ["", "", email, fname, mname, lname, email, "", "", "", "", "", "", "", "", "", "", "",  phone, course_name, class_date, "", "YES"]
+        studentinfo = ["", "", email, fname, mname, lname, email, "", "", "", "", "", "", "", "", "", "", "", phone,
+                       course_name, class_date, "", "YES"]
         sheet.insert_row(studentinfo, row)
         row += 1
+
 
 def acuity_new_student(course_name, fullname, phone, email, classdate, location):
     a = fullname.find(" ")
     fname = fullname[0:a]
-    lname = fullname[a+1:]
+    lname = fullname[a + 1:]
 
     lc = location.find(",")
-    locformat = location[lc+2:] + " " + location[0:lc]
-
+    locformat = location[lc + 2:] + " " + location[0:lc]
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
              'https://www.googleapis.com/auth/drive'
@@ -97,8 +94,8 @@ def acuity_new_student(course_name, fullname, phone, email, classdate, location)
     sheet.insert_row(studentinfo, 2)
 
 
-
 def main():
+
     with open("Acuity_email.txt", 'r') as af:
         datestr = ""
         locstr = ""
@@ -115,9 +112,9 @@ def main():
                 elif "PALS" in line:
                     coursestr = "PALS"
                 d = line.find(",")
-                dend = line[d+1:].find(",")
+                dend = line[d + 1:].find(",")
                 dend += d + 7
-                datestr = line[d+2:dend]
+                datestr = line[d + 2:dend]
             elif "Name:" in line:
                 namestr = line[6:-1]
             elif "Phone:" in line:
@@ -128,9 +125,11 @@ def main():
                 l2 = line.rfind(" ")
                 l1sub = line.rfind(",")
                 l1 = line[:l1sub].rfind(",")
-                locstr = line[l1+2:l2]
+                locstr = line[l1 + 2:l2]
 
-        acuity_new_student(coursestr, namestr,phonestr,emailstr,datestr, locstr)
+        print(f'New Aquity student: {namestr}\n Uploading info to Combined AHA sheet...')
+        acuity_new_student(coursestr, namestr, phonestr, emailstr, datestr, locstr)
+        print('Done.\n')
     af.close()
 
 
@@ -143,6 +142,7 @@ def main():
     mm = date[0]
     dd = date[1]
     yy = date[2]
+    f.close()
     newurl = urlconvert.urlmaker(mm, dd, yy)
     driver.get(newurl)
     time.sleep(2)
@@ -172,19 +172,13 @@ def main():
 
     tabledata = ""
     tabledata = driver.find_elements(By.TAG_NAME, "td")
-
-    AHA_new_student(tablecells=tabledata, class_date=datestr)
+    if tabledata:
+        print(f'New students found. Uploading info to Combined AHA Sheet...')
+        AHA_new_student(tablecells=tabledata, class_date=datestr)
+        print('Done.\n')
 
     driver.close()
-
-
-    f = open("webdata.txt", 'w')
-    lines = []
-    for line in lines:
-        f.write(line)
-        f.write('\n')
-
-    f.close()
+    RQI_upload.sheetgrab()
 
     return
 
@@ -206,7 +200,6 @@ time.sleep(5)
 signin = driver.find_element(By.CLASS_NAME, "")
 signin.click()
 """
-
 
 # Playwright Login Test
 """

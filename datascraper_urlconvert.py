@@ -13,7 +13,7 @@ def urlmaker(mm, dd, yy):
     end = datetime(yy, mm, dd, 20, tzinfo=timezone.utc)
     start_ms = int(start.timestamp()) * 1000
     end_ms = int(end.timestamp()) * 1000
-    print(end_ms, "\n")
+    # print(end_ms, "\n")
     url = f"https://atlas.heart.org/organisation/classes-i-teach?orgSwitch=true&applyTsFilter=true&isFirstTsSelected=false&instructorIds=26027755195&classStartDate={start_ms}&classEndDate={end_ms}&fromDate={yy}-0{mm}-{dd}&toDate={yy}-0{mm}-{dd+1}&sortBy=startDateTime&sortDir=desc&pageSize=10&classTeachTrainingCenter=false"
     return url
 
