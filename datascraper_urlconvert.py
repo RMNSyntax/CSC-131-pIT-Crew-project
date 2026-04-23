@@ -10,7 +10,7 @@ def dateparser(datestr):
 def urlmaker(mm, dd, yy):
 
     start = datetime(yy, mm, dd, 8, tzinfo=timezone.utc)
-    end = datetime(yy, mm, dd+2, 7, 59, tzinfo=timezone.utc)
+    end = datetime(yy, mm, dd, 20, tzinfo=timezone.utc)
     start_ms = int(start.timestamp()) * 1000
     end_ms = int(end.timestamp()) * 1000
     print(end_ms, "\n")
