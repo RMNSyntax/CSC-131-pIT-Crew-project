@@ -25,6 +25,9 @@ MAIN.gs
 
 
 /// keeping queued emails at 10 and aha emails at 1 as a tester. This will change once we get access to main account. 
+
+/// *NOTE* The email funcs are subject to change due to Ethan M's Email Task. 
+
 function main() {
   const aha = pollAhaEmails_();
   const queued = queueRegistrationEmails_();
@@ -152,6 +155,7 @@ function renderTemplate_(tpl, vars) {
 }
 
 
+/// * NOTE * THIS IS SUBJECT TO CHANGE DUE TO ETHAN M's EMAIL TASK/ALG
 
 emailOutbox.gs
 
