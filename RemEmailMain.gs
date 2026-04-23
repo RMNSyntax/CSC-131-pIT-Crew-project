@@ -1,4 +1,6 @@
 // Coded in JavaScript for App Script
+// @author Ethan McDonald
+// THIS IS NOT CURRENTLY BEING USED
 function main() {
   //Access google sheet
   var wb = SpreadsheetApp.getActiveSpreadsheet();
