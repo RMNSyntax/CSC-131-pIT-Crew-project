@@ -9,7 +9,8 @@ function sendReminder() {
   var name = '';
   var sendDate = ''; //Send date currently = 20 month after Add date
   var emailAddress = '';
-  var hasSent = true;
+  var eDate; //Expiration date
+  var hasSent = false;
   var count = 1;
   var todayDate = new Date();
 //forEach all users.
@@ -19,6 +20,7 @@ function sendReminder() {
     hasSent = userInfoArr[6];
     name = userInfoArr[1];
     emailAddress = userInfoArr[0];
+    eDate = userInfoArr[5];
     range = reminderSheet.getRange("G" + count);
     //Checks values in console
     Logger.log(range);
@@ -29,18 +31,18 @@ function sendReminder() {
     if (sendDate.getFullYear() == todayDate.getFullYear() && sendDate.getMonth() == todayDate.getMonth() && hasSent == false) {
 
       try {
-        GmailApp.sendEmail(emailAddress, "Test!", "This is a reminder, " + name);
+          var htmlTemplate = HtmlService.createTemplateFromFile('RemEmail');
+          htmlTemplate.name = name;
+          htmlTemplate.edate = eDate;
+           var htmlForEmail = htmlTemplate.evaluate().getContent();
+        GmailApp.sendEmail(emailAddress, name + ', your CPR certification is expiring soon', 'this email contains html',
+    {htmlBody: htmlForEmail});
         range.setValue(true); //Sets hasSent to true on sheet
 
       }
-      catch (e) {
-        try {
-          GmailApp.sendEmail(errorEmail, "Error sending email", "There was an error sending email to " + name + " - " + emailAddress + " with script ID " + ScriptApp.getScriptId);
-        }
         catch (e) {
           Logger.log("Failed to send email for " + name + " to " + emailAddress + ". Make sure the data in the sheet is valid (valid email address). If it is, is the API down?");
         }
       }
-    }
   })
 }
